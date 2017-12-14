@@ -50,7 +50,7 @@ void tm1726_stop()
 *-----------------------------------------------------------------------------*/
 void write_byte_tm1726(unsigned char byte)
 {
-	/*
+	
 	unsigned char i, temp;
 
 	temp = 0x01;  //80
@@ -72,8 +72,9 @@ void write_byte_tm1726(unsigned char byte)
 		TM1726_SCL_1;				//clk = 1 for data write into 1632
 		byte >>= 1;   //>>
 	}
-	*/
 	
+	
+	/*
 	unsigned char i ;
 	TM1726_SDA_0;
 	TM1726_SCL_0;
@@ -91,9 +92,8 @@ void write_byte_tm1726(unsigned char byte)
 		}
 		_delay_us(TINGD);
 		TM1726_SCL_1;				//clk = 1 for data write into 1632
-
 	}
-	
+	*/
 	TM1726_SCL_0;
 	TM1726_SDA_0;
 }
@@ -225,22 +225,12 @@ void write_byte_address_tm1726(unsigned char Address, unsigned char byte)
 *-----------------------------------------------------------------------------*/
 void write_string_address_tm1726(unsigned char Address,unsigned char len,unsigned char *Data)
 {
-	unsigned char i;
-	TM1726_SDA_1;
-	TM1726_SCL_1;
-	tm1726_start();
-	_delay_us(TINGD);
-	write_byte_tm1726(0xc0 + Address);
-	// all RAM have 96
-	for (i = 0; i < len; i++)
-	{
-		TM1726_SDA_1;
-		TM1726_SCL_1;
-		write_byte_tm1726((*(Data + i)));
+	while(len--){
+		write_byte_address_tm1726(Address++, *Data++);		
 	}
-	tm1726_stop();
 }
 
+const unsigned char  Device[] = "A1111378";
 
 void lcd_init()
 {
@@ -248,9 +238,91 @@ void lcd_init()
 	_delay_ms(200);
 	write_all_ram_tm1726(1);
 	_delay_ms(1000);
-	//WRITE_ALLRAM_1726(0);
+	write_all_ram_tm1726(0);
 	
-	//flow_set(&Device[3]);//显示设备码
-	//REFRESH_ALLRAM_1726();
-	//_delay_ms(3000);
+	lcd_show_number(4985);
+	
+	
+	_delay_ms(5000);
+	
+}
+
+void lcd_show_number(unsigned int number){
+	unsigned char cache[5];
+	make_number_array(number, cache);
+	write_string_address_tm1726(5, 5, cache);
+}
+
+void flow_set(unsigned int number)
+{
+	unsigned char cache[5] = {0};
+	itoa(number, cache, 10);
+	unsigned char len = strlen(cache);
+	if(len > 5)
+	len = 5;
+	
+	switch(len)
+	{
+		case 0:
+		LCDNUM[9]=0x00;
+		case 1:
+		LCDNUM[8]=0x00;
+		case 2:
+		LCDNUM[7]=0x00;
+		case 3:
+		LCDNUM[6]=0x00;
+		case 4:
+		LCDNUM[5]=0x00;
+		default: break;
+	}
+	
+	switch(len)
+	{
+		case 5:
+		LCDNUM[5]=SMGL[*(cache+ len - 5)-48];
+		case 4:
+		LCDNUM[6]=SMGL[*(cache+ len - 4)-48];
+		case 3:
+		LCDNUM[7]=SMGL[*(cache+ len - 3)-48];
+		case 2:
+		LCDNUM[8]=SMGL[*(cache+ len - 2)-48];
+		case 1:
+		LCDNUM[9]=SMGL[*(cache+ len - 1)-48];
+		default: break;
+	}
+}
+
+
+make_number_array(unsigned int number, unsigned char *number_array){
+	
+	unsigned char cache[5] = {0};
+	itoa(number, cache, 10);
+	
+	unsigned char len = strlen(cache);
+	if(len > 5)
+	len = 5;
+	
+	switch(len)
+	{
+		case 5:
+		number_array[0]=SMGL[*(cache+ len - 5)-48];
+		case 4:
+		number_array[1]=SMGL[*(cache+ len - 4)-48];
+		case 3:
+		number_array[2]=SMGL[*(cache+ len - 3)-48];
+		case 2:
+		number_array[3]=SMGL[*(cache+ len - 2)-48];
+		case 1:
+		number_array[4]=SMGL[*(cache+ len - 1)-48];
+		default: break;
+	}
+}
+
+void lcd_test(){
+	unsigned char number[4] = {0};
+	for (unsigned char i = 0 ; i < 5 ; i++)
+	{
+		
+		
+	}
 }

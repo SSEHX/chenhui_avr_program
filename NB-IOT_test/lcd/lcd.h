@@ -11,6 +11,9 @@
 
 #include "../port/port.h"
 #include <util/delay.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define TINGD 1 
 

@@ -18,7 +18,8 @@ app.d app.o: .././app.c .././app.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h \
  .././eeprom/eeprom.h .././port/port.h .././adc/adc.h .././uart/uart.h \
- .././device/device.h .././lcd/lcd.h .././lcd/../port/port.h
+ .././device/device.h .././lcd/lcd.h .././lcd/../port/port.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h
 
 .././app.h:
 
@@ -71,3 +72,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 .././lcd/lcd.h:
 
 .././lcd/../port/port.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h:

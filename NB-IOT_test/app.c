@@ -12,7 +12,8 @@ int main(void)
 {
 	port_init();
 	lcd_init();
-	write_all_ram_tm1726(1);
+	write_all_ram_tm1726(0);
+
 	
     /* Replace with your application code */
     while (1) 

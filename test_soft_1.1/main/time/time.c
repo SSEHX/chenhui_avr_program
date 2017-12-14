@@ -510,6 +510,7 @@ SIGNAL(TIMER2_COMP_vect)//定时器T2比较中断
 	//TCNT0 = 0x00;
 	//BEEP(20);
 }
+atoi
 
 //制水的时候开启定时器3计算时间，检测tds1，tds2,制水的时间
 SIGNAL(TIMER3_OVF_vect)//计算制水的时间100ms
