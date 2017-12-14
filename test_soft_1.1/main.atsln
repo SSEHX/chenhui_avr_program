@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "main", "main\main.cproj", "{FEE29784-05D0-419F-A798-3B5D80BD9349}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "ASF_TEST", "C:\Users\许旗\Documents\Atmel Studio\7.0\ASF_TEST\ASF_TEST.cproj", "{DCE6C7E3-EE26-4D79-826B-08594B9AD897}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "MEGA_GPIO_EXAMPLE1", "C:\Users\许旗\Documents\Atmel Studio\7.0\MEGA_GPIO_EXAMPLE1\MEGA_GPIO_EXAMPLE1.cproj", "{9817681F-C9ED-4CA6-A050-DA1FF408F292}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Debug|AVR.ActiveCfg = Debug|AVR
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Debug|AVR.Build.0 = Debug|AVR
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Release|AVR.ActiveCfg = Release|AVR
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Release|AVR.Build.0 = Release|AVR
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|AVR.ActiveCfg = Debug|AVR
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|AVR.Build.0 = Debug|AVR
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|AVR.ActiveCfg = Release|AVR
+		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|AVR.Build.0 = Release|AVR
+		{9817681F-C9ED-4CA6-A050-DA1FF408F292}.Debug|AVR.ActiveCfg = Debug|AVR
+		{9817681F-C9ED-4CA6-A050-DA1FF408F292}.Debug|AVR.Build.0 = Debug|AVR
+		{9817681F-C9ED-4CA6-A050-DA1FF408F292}.Release|AVR.ActiveCfg = Release|AVR
+		{9817681F-C9ED-4CA6-A050-DA1FF408F292}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
