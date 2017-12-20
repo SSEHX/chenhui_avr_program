@@ -11,7 +11,6 @@
 
 #include <string.h>
 #include <util/delay.h>
-#include <stdlib.h>;
 #include "../uart/uart.h"
 
 
@@ -24,7 +23,7 @@
 #define LOOP    1       //循环发送
 #define UNLOOP  0       //不循环发送
 
-#define BC95_COMMAND_DELAY 10
+#define BC95_COMMAND_DELAY 1000
 
 
 /*--------------------------------------------------
@@ -93,13 +92,19 @@ struct bc95_query_data_flag{
 	unsigned char colon_offset;				//冒号偏移位置
 	unsigned char comma_offset_number;		//逗号数量
 	unsigned char comma_offset[10];			//逗号偏移位置数组（可能有多个逗号）
+	unsigned char info_offset_start;		//信息数据开始偏移位置		
+	unsigned char info_offset_stop;			//信息数据结束偏移位置
 };
 
 struct bc95_query_data_flag query_data_flag;
 
 struct bc95_device_status{
-	unsigned char band[3];		//频段
-	unsigned char csq[3];		//信号强度
+	unsigned char band[3];					//频段
+	unsigned char csq[3];					//信号强度
+	unsigned char imei[16];					//imei码
+	unsigned char imsi[16];					//imsi码
+	unsigned char profile_status;			//profile配置状态
+
 };
 
 struct bc95_device_status device_status_bc95;
@@ -110,9 +115,9 @@ void bc95_update_display_csq();
 unsigned char bc95_create_socket();
 
 unsigned char type_set_process();
-unsigned char type_info_process();
+unsigned char type_info_process(unsigned char init_command_number);
 unsigned char type_query_process(unsigned char callback_function_number);
-
+unsigned char query_process(unsigned char (*callback)());
 
 /*-------------------------------------------------
 		bc95 query类型数据回调函数

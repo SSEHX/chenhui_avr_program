@@ -16,22 +16,13 @@ void system_init(){
 	init_bc95();
 	sei();
 }
-unsigned char call(){
-	lcd_update_pure_ppm_display(111);
-}
-
-void call_test(unsigned char (*callback)()){
-	callback();
-}
 
 int main(void)
 {
 	system_init();
 	
-	unsigned char test[3] = "5";
-	lcd_update_raw_ppm_display(atoi(device_status_bc95.band));
-	
-	call_test(call);
+	lcd_update_pure_ppm_display(sizeof(query_data_flag.message));
+
 	while(1)
 	{
 		

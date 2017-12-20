@@ -64,7 +64,7 @@ exemple
 
 end
 -----------------------------------------------*/
-unsigned  char command_1[] = "AT+CMEE=1\r\n";
+unsigned  char command_1[] = "AT+CMEE=0\r\n";
 
 /*-----------------------------------------------
 获取模块制造商信息
@@ -80,7 +80,7 @@ exemple
 
 end  					此返回只针对bc95模块
 -----------------------------------------------*/
-unsigned char command_2[] = "AT+CGMI\r\n";
+//unsigned char command_2[] = "AT+CGMI\r\n";
 
 
 /*-----------------------------------------------
@@ -97,7 +97,7 @@ exemple
 
 end
 -----------------------------------------------*/
-unsigned char command_3[] = "AT+CGMM\r\n";
+//unsigned char command_3[] = "AT+CGMM\r\n";
 
 
 /*-----------------------------------------------
@@ -275,6 +275,7 @@ struct at_init_command init_command[12] = {
 		command_1,
 		NULL
 	},
+	/*
 	{
 		INFO,
 		UNLOOP,
@@ -287,6 +288,7 @@ struct at_init_command init_command[12] = {
 		command_3,
 		NULL
 	},
+	*/
 	{
 		QUERY,
 		UNLOOP,
@@ -348,7 +350,7 @@ struct at_init_command init_command[12] = {
 * 返 回 值：无
 *-----------------------------------------------------------------------------*/
 void init_bc95(){
-    for (unsigned char i = 0; i < 12; i++)
+    for (unsigned char i = 0; i < 10; i++)
     {
 		bc95_send_string(init_command[i].command);		
         unsigned char	resend_count = RESEND_NUMBER;       //初始化循环检查次数
@@ -394,16 +396,18 @@ void init_bc95(){
 
             case INFO:
                 //如果检测执行不成功则判断是否需要重新发送
-                if (type_info_process() != 1){
+                if (type_info_process(i) != 1){
 					//如果不成功且命令需要循环发送就循环发送最大循环次数并判断是否成功
                     while(((resend_count--) > 0) && (init_command[i].loop_config == LOOP)){
 						bc95_send_string(init_command[i].command);
-						_delay_ms(BC95_COMMAND_DELAY);
-                        if (type_info_process() == 1){
+						_delay_ms(BC95_COMMAND_DELAY);			//延时一段时间再发送
+                        if (type_info_process(i) == 1){
+							set_bc95_query_data_flag_empty();
                             break;
                         }
                     }
                 }
+				set_bc95_query_data_flag_empty();
                 break;
             default:
                 break;
@@ -419,6 +423,12 @@ void init_bc95(){
 * 返 回 值：无
 *-----------------------------------------------------------------------------*/
 unsigned char type_set_process(){
+/*--------------------------------------
+			调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 set process is run ... \r\n");
+#endif
 	unsigned char uart1_rx_array1[] = "\r\nOK\r\n";
 	if (strstr(uart1_rx_array1, bc95_response_ok) != NULL)
 	{
@@ -441,47 +451,76 @@ unsigned char type_set_process(){
 * 出口参数：无
 * 返 回 值：无
 *-----------------------------------------------------------------------------*/
-unsigned char type_info_process(){
-	unsigned char info[20] = {0};
-	unsigned char state_location[6] = {0}, *p_state_location;
-	p_state_location = state_location;
-	p_state_location = strstr(uart1_rx_array, bc95_response_ok);
-	if (state_location != NULL)
+unsigned char type_info_process(unsigned char init_command_number){
+	unsigned char test[] = "\r\n460111176388046\r\n\r\nOK\r\n";
+	//strcpy(query_data_flag.message, uart1_rx_array);
+	strcpy(query_data_flag.message, test);
+	uart1_rx_array_set_empty();
+	query_data_flag.message_length = strlen(query_data_flag.message);
+	unsigned char cache_count = 0;
+	/*--------------------------------------
+					调试输出
+    --------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 info process is run ... \r\n");
+#endif
+	
+	if (strstr(query_data_flag.message, bc95_response_ok) != NULL)
 	{
-		return 1;
-		uart1_rx_array_set_empty();
+		//循环遍历信息
+		for (unsigned int i = 0 ; i < query_data_flag.message_length ; i ++){
+			if (query_data_flag.message[i] == '\r')
+			{
+				//如果已经找到数据开头，则再次检测到”\r“为结束
+				if (query_data_flag.info_offset_start != 0)		
+				{
+					query_data_flag.info_offset_stop = i;
+					return init_command[init_command_number].callback_function();
+				}
+				//如果检测到”\r“则直接看下一位是否为”\n“如果是则直接跳过/n到数据位
+				if (query_data_flag.message[i+1] == '\n')		
+				{
+					i++;
+					//设置信息开始位置偏移量
+					query_data_flag.info_offset_start = i+1;
+				}
+			}
+		}
 	}	//判断是否出错，
-	else if (strstr(uart1_rx_array, bc95_response_error) != NULL)
+	else if (strstr(query_data_flag.message, bc95_response_error) != NULL)
 	{
 		return 0;
-		uart1_rx_array_set_empty();
 	}else{
 		return 0;
-		uart1_rx_array_set_empty();
 	}
-	
-	uart1_rx_array_set_empty();
 	return 0;
 }
 
 /*------------------------------------------------------------------------------
 * 函数名称：type_query_process
 * 功    能：类型为query的数据处理
-* 入口参数：无
+
+* 入口参数：unsigned char callback_function_number		初始化命令编号
+	
 * 出口参数：无
-* 返 回 值：无
+
+* 返 回 值：unsigned char						1--->成功	0--->不成功
 *-----------------------------------------------------------------------------*/
 
 unsigned char type_query_process(unsigned char callback_function_number){
 	//测试数据
-	unsigned char uart1_rx_array1[] = "\r\n+NBAND:5\r\n\r\nOK\r\n";
-	strcpy(query_data_flag.message, uart1_rx_array1);							//复制串口数据
-	uart1_rx_array_set_empty();													//清空串口数据用于接收
+	//unsigned char uart1_rx_array1[] = "\r\n+NBAND:5\r\n\r\nOK\r\n";
+	//unsigned char uart1_rx_array1[] = "\r\n+CSQ:12,99\r\n\r\nOK\r\n";
+	//unsigned char uart1_rx_array1[] = "\r\n+CGSN:863703030636570\r\n\r\nOK\r\n";
+	unsigned char uart1_rx_array1[] = "\r\n+CGATT:1\r\n\r\nOK\r\n";
+	strcpy(query_data_flag.message, uart1_rx_array1);	//复制串口数据
+	uart1_rx_array_set_empty();							//清空串口数据用于接收
+													
 	query_data_flag.comma_offset_number = 0;									//初始化逗号记录，记录有多少个逗号，就有+1个数据
 	
-	if (strstr(uart1_rx_array1, bc95_response_ok)!= NULL && strstr(uart1_rx_array1, "+") != NULL && strstr(uart1_rx_array1, ":") != NULL)
+	if (strstr(query_data_flag.message, bc95_response_ok)!= NULL && strstr(query_data_flag.message, "+") != NULL && strstr(query_data_flag.message, ":") != NULL)
 	{
-		query_data_flag.message_length = strlen(uart1_rx_array1);				//如果接收完成，则计算字符串长度
+		query_data_flag.message_length = strlen(query_data_flag.message);				//如果接收完成，则计算字符串长度
 		for (unsigned char i = 0 ; i < query_data_flag.message_length ; i++)	//循环处理字符串，将标志与信息记录在query_data_flag结构体里
 		{
 			if (query_data_flag.message[i] == '+')								//判断如果是”+“则记录”+“位置
@@ -498,7 +537,7 @@ unsigned char type_query_process(unsigned char callback_function_number){
 		}		
 		return init_command[callback_function_number].callback_function();		//调用回调函数，并返回处理结果
 	}	//判断是否出错，
-	else if (strstr(uart1_rx_array1, bc95_response_error) != NULL)
+	else if (strstr(query_data_flag.message, bc95_response_error) != NULL)				//如果检测到错误标志则返回0
 	{
 		return 0;
 	}else{
@@ -507,7 +546,50 @@ unsigned char type_query_process(unsigned char callback_function_number){
 	return 0;
 }
 
+/*------------------------------------------------------------------------------
+* 函数名称：query_process
+* 功    能：发送命令之后解析bc95返回的数据
 
+* 入口参数：unsigned char (*callback)()			回调函数	用于验证解析后的数据
+	
+* 出口参数：无
+
+* 返 回 值：unsigned char						1--->成功	0--->不成功
+*-----------------------------------------------------------------------------*/
+unsigned char query_process(unsigned char (*callback)()){
+	//测试数据
+	//unsigned char uart1_rx_array1[] = "\r\n+NBAND:5\r\n\r\nOK\r\n";
+	strcpy(query_data_flag.message, uart1_rx_array);							//复制串口数据
+	uart1_rx_array_set_empty();													//清空串口数据用于接收
+	query_data_flag.comma_offset_number = 0;									//初始化逗号记录，记录有多少个逗号，就有+1个数据
+	
+	if (strstr(query_data_flag.message, bc95_response_ok)!= NULL && strstr(query_data_flag.message, "+") != NULL && strstr(query_data_flag.message, ":") != NULL)
+	{
+		query_data_flag.message_length = strlen(query_data_flag.message);				//如果接收完成，则计算字符串长度
+		for (unsigned char i = 0 ; i < query_data_flag.message_length ; i++)	//循环处理字符串，将标志与信息记录在query_data_flag结构体里
+		{
+			if (query_data_flag.message[i] == '+')								//判断如果是”+“则记录”+“位置
+			{
+				query_data_flag.add_offset = i;
+			}else if (query_data_flag.message[i] == ':')						//判断如果是”：“则记录”：“位置
+			{
+				query_data_flag.colon_offset = i;
+			}else if (query_data_flag.message[i] == ',')						//判断如果是”，“则记录”，“位置，并存储在数组内
+			{
+				query_data_flag.comma_offset[query_data_flag.comma_offset_number] = i;
+				query_data_flag.comma_offset_number++;
+			}
+		}
+		return callback();		//调用回调函数，并返回处理结果
+	}	//判断是否出错，
+	else if (strstr(query_data_flag.message, bc95_response_error) != NULL)
+	{
+		return 0;
+		}else{
+		return 0;
+	}
+	return 0;
+}
 
 /*------------------------------------------------------------------------------
 * 函数名称：bc95_reboot
@@ -529,6 +611,14 @@ void bc95_reboot(){
 * 返 回 值：无
 *-----------------------------------------------------------------------------*/
 unsigned char bc95_create_socket(){
+	
+	/*--------------------------------------
+					调试输出
+    --------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 start create socket ... \r\n");
+#endif
+
     unsigned char command[30] = {0};
     unsigned char command_basic[] = "AT+NSOCR=DGRAM,17,";
 
@@ -544,10 +634,37 @@ unsigned char bc95_create_socket(){
 	//发送给bc95
 	bc95_send_string(command);
 	
-	socket_config.socket_number = type_query_process(callback_create_socket);
+	/*--------------------------------------
+					调试输出
+    --------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 create socket command ---> ");
+	uart0_send_string(command);
+	uart0_send_string("\r\n");
+#endif
+
+	socket_config.socket_number = query_process(callback_create_socket);
 }
 
+/*------------------------------------------------------------------------------
+* 函数名称：bc95_send_socket
+* 功    能：通过bc95发送一串数据到指定服务器，用于构建发送命令，并发送
+
+* 入口参数：struct bc95_send send_data
+
+* 出口参数：无
+
+* 返 回 值：unsigned char 发送是否成功，	1--->成功	0--->不成功
+*-----------------------------------------------------------------------------*/
 unsigned char bc95_send_socket(struct bc95_send send_data){
+	
+/*--------------------------------------
+			调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 start send socket ... \r\n");
+#endif
+
 	unsigned char command[100] = {0};
 	unsigned char command_basic[] = "AT+NSOST=";
 	
@@ -563,22 +680,108 @@ unsigned char bc95_send_socket(struct bc95_send send_data){
 	strcat(command, send_data.message);
 	
 	bc95_send_string(command);
-}
-
-inline void set_bc95_query_data_flag_empty(){
-	memset(&query_data_flag, 0 , sizeof(struct bc95_query_data_flag));
-}
-
-//获取imei回调函数
-unsigned char callback_get_imei(){
+	
 	
 }
 
+/*------------------------------------------------------------------------------
+* 函数名称：set_bc95_query_data_flag_empty
+* 功    能：清空 query_data_flage	结构体
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+inline void set_bc95_query_data_flag_empty(){
+	memset(&query_data_flag , 0, sizeof(struct bc95_query_data_flag));
+}
+
+/*------------------------------------------------------------------------------
+* 函数名称：callback_get_imei
+* 功    能：解析bc95返回的数据，读取imei
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：unsigned char 获取是否成功，	1--->成功	0--->不成功
+*-----------------------------------------------------------------------------*/
+unsigned char callback_get_imei(){
+	unsigned char name[] = "CGSN";
+	unsigned char cache_count = 0;
+	
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 get imei is run ... \r\n");
+#endif
+
+	if (strstr(query_data_flag.message, name) != NULL)			//判断是否是需要的返回值
+	{
+		//从”：“开始检查并存储数据到device_status_bc95.band	直到碰见“\r”数据结束
+		for (unsigned char i = query_data_flag.colon_offset+1 ; i < query_data_flag.message_length ; i++)
+		{
+			if (query_data_flag.message[i] != '\r')
+			{
+				device_status_bc95.imei[cache_count] = query_data_flag.message[i];
+				cache_count++;
+			}else{
+				if ((i - query_data_flag.colon_offset) != 16)
+				{
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+				uart0_send_string("bc95 get imei ----> ");
+				uart0_send_string("NUMBER ERROR");
+				uart0_send_string(" \r\n");
+#endif
+					return 0;
+				}
+/*--------------------------------------
+			调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+				uart0_send_string("bc95 get imei ----> ");
+				uart0_send_string(device_status_bc95.imei);
+				uart0_send_string(" \r\n");
+#endif
+				
+				return 1;
+			}
+		}
+	}else{
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+		uart0_send_string("bc95 get imei ----> ");
+		uart0_send_string("ERROR");
+		uart0_send_string(" \r\n");
+#endif
+		return 0;
+	}
+}
+
+
+/*------------------------------------------------------------------------------
+* 函数名称：callback_get_band
+* 功    能：解析bc95返回的数据，读取band
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：unsigned char 获取是否成功，	1--->成功	0--->不成功
+*-----------------------------------------------------------------------------*/
 unsigned char callback_get_band(){
 	unsigned char name[] = "NBAND";
 	unsigned char cache_count = 0;
-	if (strstr(query_data_flag.message, name) != NULL)
+	
+	/*--------------------------------------
+					调试输出
+    --------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 get band is run ... \r\n");
+#endif
+
+	if (strstr(query_data_flag.message, name) != NULL)			//判断是否是需要的返回值
 	{
+		//从”：“开始检查并存储数据到device_status_bc95.band	直到碰见“\r”数据结束
 		for (unsigned char i = query_data_flag.colon_offset+1 ; i < query_data_flag.message_length ; i++)
 		{
 			if (query_data_flag.message[i] != '\r')
@@ -586,44 +789,178 @@ unsigned char callback_get_band(){
 				device_status_bc95.band[cache_count] = query_data_flag.message[i];
 				cache_count++;
 			}else{
+				/*--------------------------------------
+								调试输出
+				--------------------------------------*/
+#ifdef	DEBUG
+				uart0_send_string("bc95 get band ----> ");
+				uart0_send_string(device_status_bc95.band);
+				uart0_send_string(" \r\n");
+#endif
+				
 				return 1;
 			}
 		}
 	}else{
+				/*--------------------------------------
+								调试输出
+				--------------------------------------*/
+#ifdef	DEBUG
+		uart0_send_string("bc95 get band ----> ");
+		uart0_send_string("ERROR");
+		uart0_send_string(" \r\n");
+#endif
 		return 0;
 	}
 }
 
+
+/*------------------------------------------------------------------------------
+* 函数名称：callback_get_csq
+* 功    能：解析bc95返回的数据，读取csq信号强度
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：unsigned char 获取是否成功，	1--->成功	0--->不成功
+*-----------------------------------------------------------------------------*/
 unsigned char callback_get_csq(){
 	unsigned char name[] = "CSQ";
 	unsigned char cache_count = 0;
-	if (strstr(query_data_flag.message, name) != NULL)
+	
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 get csq is run ... \r\n");
+#endif
+
+	if (strstr(query_data_flag.message, name) != NULL)	//判断是否存在返回的需要的相关数据
 	{
+		//循环存储数据，从“：”开始为数据，碰到“，”即为结束
 		for (unsigned char i = query_data_flag.colon_offset+1 ; i < query_data_flag.message_length ; i++)
 		{
-			if (query_data_flag.message[i] != ',')
+			uart0_send_string(i);
+			if (query_data_flag.message[i] != ',')		//如果碰不到“，”则继续接收
 			{
 				device_status_bc95.csq[cache_count] = query_data_flag.message[i];
-				cache_count++;
-				}else{
+				cache_count++;						
+			}else{										//碰到“，”则返回1			
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+				uart0_send_string("bc95 get csq ----> ");
+				uart0_send_string(device_status_bc95.csq);
+				uart0_send_string(" \r\n");
+#endif
 				return 1;
 			}
 		}
-		}else{
+	}else{												//如果没有检测到相关的返回数据，则返回0
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+		uart0_send_string("bc95 get csq ----> ");
+		uart0_send_string("ERROR");
+		uart0_send_string(" \r\n");
+#endif
 		return 0;
 	}
-	return 0;
+		return 0;
 }
 
 unsigned char callback_get_imsi(){
-	return 0;
+	unsigned char cache_count = 0;
+	
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 get imsi is run ... \r\n");
+#endif
+	//判断获取到的imsi是否为15位如果不是则返回0
+	if ((query_data_flag.info_offset_stop - query_data_flag.info_offset_start) != 15)
+	{
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+		uart0_send_string("bc95 get imsi ---> ");
+		uart0_send_string("NUMBER ERROR");
+		uart0_send_string(" \r\n");
+#endif
+		return 0;
+	}
+	//从起始偏移量开始复制到当前位置，即为imsi的数据,并返回
+	for (unsigned int i = query_data_flag.info_offset_start ; i < query_data_flag.info_offset_stop ; i++)
+	{
+		device_status_bc95.imsi[cache_count] = query_data_flag.message[i];
+		cache_count++;
+	}
+
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 get imsi ---> ");
+	uart0_send_string(device_status_bc95.imsi);
+	uart0_send_string(" \r\n");
+#endif
+	return 1;
 }
 
 unsigned char callback_get_eps_status(){
 	return 0;
 }
 unsigned char callback_get_profile_status(){
-	return 0;
+	
+	unsigned char name[] = "CGATT";
+	
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 get profile status is run ... \r\n");
+#endif
+
+	if (strstr(query_data_flag.message, name) != NULL)			//判断是否是需要的返回值
+	{
+		if (query_data_flag.message[query_data_flag.colon_offset+1] == '1' || query_data_flag.message[query_data_flag.colon_offset+1] == 1)
+		{
+			device_status_bc95.profile_status = query_data_flag.message[query_data_flag.colon_offset+1];
+			
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+				uart0_send_string("bc95 get profile status ----> ");
+				uart0_send_byte(device_status_bc95.profile_status);
+				lcd_update_raw_ppm_display(device_status_bc95.profile_status);
+				uart0_send_string(" \r\n");
+#endif
+			return 1;
+		}else{
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+				uart0_send_string("bc95 get profile status ----> ");
+				uart0_send_string("ERROR");
+				uart0_send_string(" \r\n");
+#endif
+			return 0;
+		}		
+	}else{
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+		uart0_send_string("bc95 get profile status ----> ");
+		uart0_send_string("ERROR");
+		uart0_send_string(" \r\n");
+#endif
+		return 0;
+	}
 }
 unsigned char callback_get_plmn(){
 	return 0;
