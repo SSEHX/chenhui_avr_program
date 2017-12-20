@@ -28,3 +28,23 @@ void beep(unsigned char second)
 	}
 	PORTB &= ~(1 << PB0);
 }
+
+
+unsigned int get_Low_switch(){
+	if ((PINB & (1 << PB6)))
+	{
+		return 1;
+	}else{
+		return 0;
+	}
+	
+}
+
+unsigned int get_hight_switch(){
+	if ((PINB & (1 << PB7)))
+	{
+		return 1;
+	}else{
+		return 0;
+	}
+}

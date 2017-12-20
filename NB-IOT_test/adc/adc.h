@@ -11,7 +11,7 @@
 
 
 //声明函数
-void adc_init();
+void init_adc();
 unsigned int adc_start_return(unsigned char channel);
 void adc_start_interrupt(unsigned char channel);
 

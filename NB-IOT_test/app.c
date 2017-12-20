@@ -7,18 +7,35 @@
 
 #include "app.h"
 
+void system_init(){
+	cli();
+	init_port();
+	init_lcd();
+	init_uart0();
+	init_uart1();
+	init_bc95();
+	sei();
+}
+unsigned char call(){
+	lcd_update_pure_ppm_display(111);
+}
+
+void call_test(unsigned char (*callback)()){
+	callback();
+}
 
 int main(void)
 {
-	port_init();
-	lcd_init();
-	write_all_ram_tm1726(0);
-
+	system_init();
 	
-    /* Replace with your application code */
-    while (1) 
-    {
+	unsigned char test[3] = "5";
+	lcd_update_raw_ppm_display(atoi(device_status_bc95.band));
+	
+	call_test(call);
+	while(1)
+	{
 		
-    }
+	}
+    
 }
 

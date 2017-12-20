@@ -2,35 +2,35 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
-adc.c
+adc\adc.c
 
-beep.c
+beep\beep.c
 
-eeprom.c
+crc\crc.c
 
-gprs.c
+eeprom\eeprom.c
+
+gprs\gprs.c
 
 init.c
 
 int.c
 
-lcd.c
+lcd\lcd.c
 
-led.c
+led\led.c
 
 prot_init.c
 
-crc.c
-
-send.c
-
-time.c
+send\send.c
 
 main.c
 
-usart.c
+time\time.c
 
-wdt_use.c
+usart\usart.c
+
+wdt\wdt_use.c
 
 wifi.c
 

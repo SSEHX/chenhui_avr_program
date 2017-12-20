@@ -94,6 +94,7 @@
     <ListValues>
       <Value>DEBUG</Value>
       <Value>F_CPU=11059200UL</Value>
+      <Value>DEBUG=1</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
@@ -133,6 +134,12 @@
     <Compile Include="app.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="bc95\bc95.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="bc95\bc95.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="device\device.c">
       <SubType>compile</SubType>
     </Compile>
@@ -145,6 +152,12 @@
     <Compile Include="EEPROM\eeprom.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="init\init.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="init\init.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="lcd\lcd.c">
       <SubType>compile</SubType>
     </Compile>
@@ -155,6 +168,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="port\port.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tools\tools.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tools\tools.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="uart\uart.c">
@@ -170,6 +189,8 @@
     <Folder Include="device" />
     <Folder Include="init" />
     <Folder Include="lcd" />
+    <Folder Include="bc95" />
+    <Folder Include="tools" />
     <Folder Include="uart" />
     <Folder Include="port" />
   </ItemGroup>

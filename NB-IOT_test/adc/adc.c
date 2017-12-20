@@ -15,13 +15,13 @@ unsigned int		adc_channel_data_list[8] = {0};
 unsigned char		adc_interrupt_channel_cache = 0;
 
 /*------------------------------------------------------------------------------
-* 函数名称：adc_init
+* 函数名称：init_adc
 * 功    能：初始化adc
 * 入口参数：无
 * 出口参数：无
 * 返 回 值：无
 *-----------------------------------------------------------------------------*/
-void adc_init()
+void init_adc()
 {
 	ADCSRA=0x00;
 	

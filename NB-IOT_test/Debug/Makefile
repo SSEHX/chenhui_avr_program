@@ -38,6 +38,8 @@ SUBDIRS :=  \
 ../device \
 ../init \
 ../lcd \
+../bc95 \
+../tools \
 ../uart \
 ../port
 
@@ -46,10 +48,13 @@ SUBDIRS :=  \
 C_SRCS +=  \
 ../adc/adc.c \
 ../app.c \
+../bc95/bc95.c \
 ../device/device.c \
 ../EEPROM/eeprom.c \
+../init/init.c \
 ../lcd/lcd.c \
 ../port/port.c \
+../tools/tools.c \
 ../uart/uart.c
 
 
@@ -62,37 +67,49 @@ ASM_SRCS +=
 OBJS +=  \
 adc/adc.o \
 app.o \
+bc95/bc95.o \
 device/device.o \
 EEPROM/eeprom.o \
+init/init.o \
 lcd/lcd.o \
 port/port.o \
+tools/tools.o \
 uart/uart.o
 
 OBJS_AS_ARGS +=  \
 adc/adc.o \
 app.o \
+bc95/bc95.o \
 device/device.o \
 EEPROM/eeprom.o \
+init/init.o \
 lcd/lcd.o \
 port/port.o \
+tools/tools.o \
 uart/uart.o
 
 C_DEPS +=  \
 adc/adc.d \
 app.d \
+bc95/bc95.d \
 device/device.d \
 EEPROM/eeprom.d \
+init/init.d \
 lcd/lcd.d \
 port/port.d \
+tools/tools.d \
 uart/uart.d
 
 C_DEPS_AS_ARGS +=  \
 adc/adc.d \
 app.d \
+bc95/bc95.d \
 device/device.d \
 EEPROM/eeprom.d \
+init/init.d \
 lcd/lcd.d \
 port/port.d \
+tools/tools.d \
 uart/uart.d
 
 OUTPUT_FILE_PATH +=NB-IOT_test.elf
@@ -124,6 +141,12 @@ LINKER_SCRIPT_DEP+=
 
 
 
+
+
+
+
+
+
 adc/%.o: ../adc/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
@@ -132,6 +155,13 @@ adc/%.o: ../adc/%.c
 	
 
 ./%.o: .././%.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=11059200UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega64a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\gcc\dev\atmega64a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+bc95/%.o: ../bc95/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=11059200UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega64a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\gcc\dev\atmega64a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
@@ -152,6 +182,13 @@ EEPROM/%.o: ../EEPROM/%.c
 	@echo Finished building: $<
 	
 
+init/%.o: ../init/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=11059200UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega64a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\gcc\dev\atmega64a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 lcd/%.o: ../lcd/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
@@ -160,6 +197,13 @@ lcd/%.o: ../lcd/%.c
 	
 
 port/%.o: ../port/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=11059200UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega64a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\gcc\dev\atmega64a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+tools/%.o: ../tools/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=11059200UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega64a -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.150\gcc\dev\atmega64a" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

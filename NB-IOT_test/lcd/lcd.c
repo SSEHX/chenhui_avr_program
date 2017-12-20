@@ -16,6 +16,18 @@ unsigned char LCDNUM[32];        //LCD的显示数组
 
 
 
+/*------------------------------------------------------------------------------
+* 函数名称：tm1726_start
+* 功    能：TM1726启动传输时序
+				_____________________
+			SCL						 \_________		保持SCL为高电平
+				________________
+			SDA					\______________		SDL从高电平跳转到低电平认为是开始信号
+			
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
 void tm1726_start()
 {
 	TM1726_SDA_1;
@@ -27,7 +39,18 @@ void tm1726_start()
 	_delay_us(10);
 }
 
-
+/*------------------------------------------------------------------------------
+* 函数名称：tm1726_stop
+* 功    能：TM1726结束传输时序
+				_________________
+			SCL					 \_________		保持SCL为高电平
+						  _________________
+			SDA	_________/						SDL从低电平跳转到高电平认为是传输结束信号
+			
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
 void tm1726_stop()
 {
 	TM1726_SDA_0;
@@ -53,36 +76,14 @@ void write_byte_tm1726(unsigned char byte)
 	
 	unsigned char i, temp;
 
-	temp = 0x01;  //80
+	temp = 0x01;  
 	TM1726_SDA_0;
 	TM1726_SCL_0;
 	_delay_us(TINGD);
 	for (i = 0; i < 8; i++)
 	{
 		TM1726_SCL_0;
-		if ((temp & byte) == 0)
-		{
-			TM1726_SDA_0;
-		}
-		else
-		{
-			TM1726_SDA_1;
-		}
-		_delay_us(TINGD);
-		TM1726_SCL_1;				//clk = 1 for data write into 1632
-		byte >>= 1;   //>>
-	}
-	
-	
-	/*
-	unsigned char i ;
-	TM1726_SDA_0;
-	TM1726_SCL_0;
-	_delay_us(TINGD);
-	for (i=0x01 ; i<=128 ; i*=2)     
-	{
-		TM1726_SCL_0;
-		if (i & byte)
+		if ((temp & byte))
 		{
 			TM1726_SDA_1;
 		}
@@ -91,9 +92,10 @@ void write_byte_tm1726(unsigned char byte)
 			TM1726_SDA_0;
 		}
 		_delay_us(TINGD);
-		TM1726_SCL_1;				//clk = 1 for data write into 1632
+		TM1726_SCL_1;				
+		byte >>= 1;   
 	}
-	*/
+
 	TM1726_SCL_0;
 	TM1726_SDA_0;
 }
@@ -107,7 +109,7 @@ void write_byte_tm1726(unsigned char byte)
 								0				全部RAM写为0
 
 * 出口参数：无
-* 返 回 值：
+* 返 回 值：无
 *-----------------------------------------------------------------------------*/
 void write_all_ram_tm1726(unsigned char write_empty)
 {
@@ -149,7 +151,7 @@ void write_all_ram_tm1726(unsigned char write_empty)
 								0				全部RAM写为0
 
 * 出口参数：无
-* 返 回 值：
+* 返 回 值：无
 *-----------------------------------------------------------------------------*/
 void update_all_ram_tm1726()
 {
@@ -177,7 +179,7 @@ void update_all_ram_tm1726()
 			PS:详见数据手册
 * 入口参数：无
 * 出口参数：无
-* 返 回 值：
+* 返 回 值：无
 *-----------------------------------------------------------------------------*/
 void init_tm1726(void)
 {
@@ -197,7 +199,7 @@ void init_tm1726(void)
 				unsigned char byte			要写入的数据
 				
 * 出口参数：无
-* 返 回 值：
+* 返 回 值：无
 *-----------------------------------------------------------------------------*/
 void write_byte_address_tm1726(unsigned char Address, unsigned char byte)
 {
@@ -221,7 +223,7 @@ void write_byte_address_tm1726(unsigned char Address, unsigned char byte)
 				unsigned char *Data			要写入的数据地址
 				
 * 出口参数：无
-* 返 回 值：
+* 返 回 值：无
 *-----------------------------------------------------------------------------*/
 void write_string_address_tm1726(unsigned char Address,unsigned char len,unsigned char *Data)
 {
@@ -232,7 +234,15 @@ void write_string_address_tm1726(unsigned char Address,unsigned char len,unsigne
 
 const unsigned char  Device[] = "A1111378";
 
-void lcd_init()
+
+/*------------------------------------------------------------------------------
+* 函数名称：init_lcd
+* 功    能：初始化lcd显示屏
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+void init_lcd()
 {
 	init_tm1726();
 	_delay_ms(200);
@@ -240,89 +250,178 @@ void lcd_init()
 	_delay_ms(1000);
 	write_all_ram_tm1726(0);
 	
-	lcd_show_number(4985);
-	
-	
-	_delay_ms(5000);
-	
 }
 
-void lcd_show_number(unsigned int number){
-	unsigned char cache[5];
-	make_number_array(number, cache);
+/*------------------------------------------------------------------------------
+* 函数名称：lcd_update_flow_display
+* 功    能：更新lcd流量显示
+
+* 入口参数：	unsigned long int	number			要显示的数字
+									必须传入一个unsigned long int 类型的整数
+
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+void lcd_update_flow_display(unsigned long int number){
+	unsigned char	cache[5] = {0};
+	make_flow_number(number, cache);
 	write_string_address_tm1726(5, 5, cache);
 }
 
-void flow_set(unsigned int number)
-{
+/*------------------------------------------------------------------------------
+* 函数名称：lcd_update_time_display
+* 功    能：更新lcd时间显示
+
+* 入口参数：	unsigned long int	number			要显示的数字
+									必须传入一个unsigned long int 类型的整数
+
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+void lcd_update_time_display(unsigned long int number){
 	unsigned char cache[5] = {0};
-	itoa(number, cache, 10);
-	unsigned char len = strlen(cache);
-	if(len > 5)
-	len = 5;
+	make_time_number(number, cache);
 	
-	switch(len)
+	write_string_address_tm1726(0, 5, cache);
+}
+
+/*------------------------------------------------------------------------------
+* 函数名称：lcd_update_pure_ppm_display
+* 功    能：更新lcd纯水ppm值
+
+* 入口参数：	unsigned long int	number			要显示的数字
+
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+void lcd_update_pure_ppm_display(unsigned int number){
+	unsigned char cache[4] = {0};
+	make_pure_ppm_number(number, cache);
+	write_string_address_tm1726(10, 4, cache);
+}
+
+/*------------------------------------------------------------------------------
+* 函数名称：lcd_update_raw_ppm_display
+* 功    能：更新lcd原水ppm值
+
+* 入口参数：	unsigned long int	number			要显示的数字
+
+* 出口参数：无
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+void lcd_update_raw_ppm_display(unsigned int number){
+	unsigned char cache[4] = {0};
+	make_raw_ppm_number(number, cache);
+	
+	write_string_address_tm1726(14, 4, cache);
+}
+
+/*------------------------------------------------------------------------------
+* 函数名称：make_number_array_down					down为数码管位置在下边
+
+* 功    能：将传入的 number 转换为数码管显示的数组		
+			用于TM1726流量显示的RAM填充数据
+			
+* 入口参数：	unsigned long int	number			要转换的数字	长度为5位
+
+* 出口参数：	unsigned char		*number_array	用于存储转换后可填充RAM的字符数组
+
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+void make_time_number(unsigned long int number, unsigned char *number_array){
+	if (number > 65535)			//判断是否为长整形					
 	{
-		case 0:
-		LCDNUM[9]=0x00;
-		case 1:
-		LCDNUM[8]=0x00;
-		case 2:
-		LCDNUM[7]=0x00;
-		case 3:
-		LCDNUM[6]=0x00;
-		case 4:
-		LCDNUM[5]=0x00;
-		default: break;
+		number_array[4] =SMGL[ (number%10) ];
+		number_array[3] =SMGL[ ((number/10)%10) ];
+		number_array[2] =SMGL[ ((number/100)%10) ];
+		number_array[1] =SMGL[ ((number/1000)%10) ];
+		number_array[0] =SMGL[ ((number/10000)%10) ] | TIME_ICON;
+	}else{
+		unsigned int cache = (unsigned int)number;
+		number_array[4] =SMGL[ (cache%10) ];
+		number_array[3] =SMGL[ ((cache/10)%10) ];
+		number_array[2] =SMGL[ ((cache/100)%10) ];
+		number_array[1] =SMGL[ ((cache/1000)%10) ];
+		number_array[0] =SMGL[ ((cache/10000)%10) ] | TIME_ICON;	
 	}
 	
-	switch(len)
+	if (!device_status_lcd.signal == NO)
 	{
-		case 5:
-		LCDNUM[5]=SMGL[*(cache+ len - 5)-48];
-		case 4:
-		LCDNUM[6]=SMGL[*(cache+ len - 4)-48];
-		case 3:
-		LCDNUM[7]=SMGL[*(cache+ len - 3)-48];
-		case 2:
-		LCDNUM[8]=SMGL[*(cache+ len - 2)-48];
-		case 1:
-		LCDNUM[9]=SMGL[*(cache+ len - 1)-48];
-		default: break;
+		for (unsigned char i = 0 ; i < device_status_lcd.signal ; i++)
+		{
+			number_array[i+1] |= SIGNAL_ICON;
+		}
+	}else{
+		number_array[1] &= ~SIGNAL_ICON;
+	}
+	
+}
+
+void make_flow_number(unsigned long int number, unsigned char *number_array){
+	if (number > 65535)			//判断是否为长整形
+	{
+		number_array[4] =SMGL[ (number%10) ];
+		number_array[3] =SMGL[ ((number/10)%10) ] | FLOW_ICON;
+		number_array[2] =SMGL[ ((number/100)%10) ];
+		number_array[1] =SMGL[ ((number/1000)%10) ];
+		number_array[0] =SMGL[ ((number/10000)%10) ];
+		}else{
+		unsigned int cache = (unsigned int)number;
+		number_array[4] =SMGL[ (cache%10) ];
+		number_array[3] =SMGL[ ((cache/10)%10) ] | FLOW_ICON;
+		number_array[2] =SMGL[ ((cache/100)%10) ];
+		number_array[1] =SMGL[ ((cache/1000)%10) ];
+		number_array[0] =SMGL[ ((cache/10000)%10) ];
+	}
+	if (device_status_lcd.signal == 5)
+	{
+		number_array[0] |= SIGNAL_ICON;
+	}else{
+		number_array[0] &= ~SIGNAL_ICON;
 	}
 }
 
 
-make_number_array(unsigned int number, unsigned char *number_array){
+/*------------------------------------------------------------------------------
+* 函数名称：make_raw_ppm_number					down为数码管位置在上边
+
+* 功    能：将传入的 number 转换为数码管显示的数组		
+			用于TM1726流量显示的RAM填充数据
+			
+* 入口参数：	unsigned int	number				要转换的数字	长度为4位
+
+* 出口参数：	unsigned char	*number_array		用于存储转换后可填充RAM的字符数组
+
+* 返 回 值：无
+*-----------------------------------------------------------------------------*/
+void make_raw_ppm_number(unsigned int number, unsigned char *number_array){
 	
-	unsigned char cache[5] = {0};
-	itoa(number, cache, 10);
-	
-	unsigned char len = strlen(cache);
-	if(len > 5)
-	len = 5;
-	
-	switch(len)
+	number_array[0] =SMG[ (number%10) ];
+	number_array[1] =SMG[ ((number/10)%10) ];
+	number_array[2] =SMG[ ((number/100)%10) ];
+	number_array[3] =SMG[ ((number/1000)%10) ] | RAW_WATER_ICON;
+	if (device_status_lcd.no_water == YES)
 	{
-		case 5:
-		number_array[0]=SMGL[*(cache+ len - 5)-48];
-		case 4:
-		number_array[1]=SMGL[*(cache+ len - 4)-48];
-		case 3:
-		number_array[2]=SMGL[*(cache+ len - 3)-48];
-		case 2:
-		number_array[3]=SMGL[*(cache+ len - 2)-48];
-		case 1:
-		number_array[4]=SMGL[*(cache+ len - 1)-48];
-		default: break;
+		number_array[0] |= NO_WATER_ICON;
+	}else{
+		number_array[0] &= ~NO_WATER_ICON;
 	}
 }
 
-void lcd_test(){
-	unsigned char number[4] = {0};
-	for (unsigned char i = 0 ; i < 5 ; i++)
+void make_pure_ppm_number(unsigned int number, unsigned char *number_array){
+	
+	number_array[0] =SMG[ (number%10) ] | PURE_WATER_ICON;
+	number_array[1] =SMG[ ((number/10)%10) ];
+	number_array[2] =SMG[ ((number/100)%10) ];
+	number_array[3] =SMG[ ((number/1000)%10) ];
+	
+	if (device_status_lcd.leakage)
 	{
-		
-		
+		number_array[3] |= LEAKAGE_ICON;
+	}else{
+		number_array[3] &= ~LEAKAGE_ICON;
 	}
+
 }
+
+

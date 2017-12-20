@@ -36,7 +36,7 @@
 
 
 
-void port_init();
+void init_port();
 
 
 
