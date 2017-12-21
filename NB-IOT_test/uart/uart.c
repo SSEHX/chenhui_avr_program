@@ -12,9 +12,6 @@
 unsigned char uart0_rx_array[UART0_RX_ARRAY_LEN] = {0};
 unsigned char uart0_rx_count	 = 0;
 
-unsigned char uart1_rx_array[UART1_RX_ARRAY_LEN] = {0};
-unsigned char uart1_rx_count	 = 0;
-
 //uart 发送数组
 unsigned char uart0_tx_array[UART0_TX_ARRAY_LEN] = {0};
 unsigned char uart1_tx_array[UART1_TX_ARRAY_LEN] = {0};
@@ -52,8 +49,10 @@ void init_uart1(void)
 	UCSR1C|=0x06;//0x06
 	
 	//波特率9600
-	UBRR1L=71;//(F_CPU/(16*baud)-1)%256; ok //(F_CPU/16/(baud+1)%256);8   5-11.0592
+	UBRR1L=143;//(F_CPU/(16*baud)-1)%256; ok //(F_CPU/16/(baud+1)%256);8   5-11.0592
 	UBRR1H=0;//(F_CPU/(16*baud)-1)/256; ok //(F_CPU/16/(baud+1)/256);0
+	
+	UCSR1A |= ( 1 << U2X1);
 	
 	//		接收完成中断使能		  TX发送使能		   RX接收使能
 	UCSR1B	|=	(1 << RXCIE1)	|	 (1 << TXEN1)	 |	 (1 << RXEN1);
@@ -147,7 +146,7 @@ inline void bc95_send_string(unsigned char *Data){
 *-----------------------------------------------------------------------------*/
 
 inline void uart1_rx_array_set_empty(){
-	memset(uart1_rx_array , 0 , sizeof(uart1_rx_array));
+	memset(uart1_rx_data.message , 0 , sizeof(struct uart1_rx));
 }
 /*------------------------------------------------------------------------------
 * 函数名称：uart1_rx_array_set_empty
@@ -157,7 +156,7 @@ inline void uart1_rx_array_set_empty(){
 * 返 回 值：无
 *-----------------------------------------------------------------------------*/
 inline void uart0_rx_array_set_empty(){
-	memset(uart0_rx_array , 0 , sizeof(uart1_rx_array));
+	memset(uart0_rx_array , 0 , sizeof(uart0_rx_array));
 }
 
 /*------------------------------------------------------------------------------
@@ -182,7 +181,7 @@ SIGNAL(USART0_RX_vect){
 
 /*------------------------------------------------------------------------------
 * 函数名称：SIGNAL(USART1_RX_vect)
-* 功    能：uart1 接收中断，将数据存入uart1_rx_array[]数组内
+* 功    能：uart1 接收中断，将数据存入uart1_rx_data.message[]数组内
 
 * 中断向量：USART1_RX_vect	接收完成
 
@@ -191,14 +190,14 @@ SIGNAL(USART0_RX_vect){
 *-----------------------------------------------------------------------------*/
 SIGNAL(USART1_RX_vect){
 	//如果接收数据的数组长度大于定义的最大长度则将计数清0
-	if (uart1_rx_count >= UART1_RX_ARRAY_LEN)
+	if (uart1_rx_data.message_length >= UART1_RX_ARRAY_LEN)
 	{
-		uart1_rx_count = 0;
+		uart1_rx_data.message_length = 0;
 	}
 	
-	while( !(UCSR1A & (1<<RXC1)) );				//判断缓冲区是否有数据
-	uart1_rx_array[uart1_rx_count] = UDR1;		//保存接收到的数据
-	uart1_rx_count++;							//计数
+	while( !(UCSR1A & (1<<RXC1)) );								//判断缓冲区是否有数据
+	uart1_rx_data.message[uart1_rx_data.message_length] = UDR1;		//保存接收到的数据
+	uart1_rx_data.message_length++;									//计数
 	
 	LED_REVERSE;
 }

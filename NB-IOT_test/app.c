@@ -13,14 +13,13 @@ void system_init(){
 	init_lcd();
 	init_uart0();
 	init_uart1();
-	init_bc95();
 	sei();
 }
 
 int main(void)
 {
 	system_init();
-	
+	init_bc95();
 	lcd_update_pure_ppm_display(sizeof(query_data_flag.message));
 
 	while(1)

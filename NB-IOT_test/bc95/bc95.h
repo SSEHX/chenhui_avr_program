@@ -23,7 +23,7 @@
 #define LOOP    1       //循环发送
 #define UNLOOP  0       //不循环发送
 
-#define BC95_COMMAND_DELAY 1000
+#define BC95_COMMAND_DELAY 4000
 
 
 /*--------------------------------------------------
@@ -104,7 +104,10 @@ struct bc95_device_status{
 	unsigned char imei[16];					//imei码
 	unsigned char imsi[16];					//imsi码
 	unsigned char profile_status;			//profile配置状态
-
+	unsigned char eps_status;				//是否启用未经请求的结果代码
+	unsigned char eps_registered_status;	//eps网络注册状态
+	unsigned char plmn_status;				//plmn状态
+	unsigned char gsm_location_number[10];	//GSM位置区域识别号码
 };
 
 struct bc95_device_status device_status_bc95;

@@ -24,8 +24,12 @@
 extern unsigned char uart0_rx_array[UART0_RX_ARRAY_LEN];
 extern unsigned char uart0_rx_count;
 
-extern unsigned char uart1_rx_array[UART1_RX_ARRAY_LEN];
-extern unsigned char uart1_rx_count;
+struct uart1_rx{
+	unsigned char message[UART1_RX_ARRAY_LEN];
+	unsigned char message_length;
+};
+
+struct uart1_rx uart1_rx_data;
 
 //uart 发送数组
 extern unsigned char uart0_tx_array[UART0_TX_ARRAY_LEN];
