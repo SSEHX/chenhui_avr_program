@@ -12,6 +12,6 @@
 #include <string.h>
 #include "../lcd/lcd.h"
 
-unsigned char stroffset(unsigned int *p1, unsigned int *p2);
+unsigned int voltage_to_tds(unsigned int adc);
 
 #endif /* TOOLS_H_ */

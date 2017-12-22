@@ -12,6 +12,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "../device/device.h"
+#include "../bc95//bc95.h"
 
 //uart 接收数组长度
 #define UART0_RX_ARRAY_LEN  200

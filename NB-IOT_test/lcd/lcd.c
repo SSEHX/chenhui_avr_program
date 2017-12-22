@@ -345,6 +345,7 @@ void make_time_number(unsigned long int number, unsigned char *number_array){
 		number_array[0] =SMGL[ ((cache/10000)%10) ] | TIME_ICON;	
 	}
 	
+	//根据设备当前状态，更新lcd
 	if (!device_status_lcd.signal == NO)
 	{
 		for (unsigned char i = 0 ; i < device_status_lcd.signal ; i++)
@@ -373,6 +374,7 @@ void make_flow_number(unsigned long int number, unsigned char *number_array){
 		number_array[1] =SMGL[ ((cache/1000)%10) ];
 		number_array[0] =SMGL[ ((cache/10000)%10) ];
 	}
+	//根据设备当前状态，更新lcd
 	if (device_status_lcd.signal == 5)
 	{
 		number_array[0] |= SIGNAL_ICON;
@@ -400,6 +402,8 @@ void make_raw_ppm_number(unsigned int number, unsigned char *number_array){
 	number_array[1] =SMG[ ((number/10)%10) ];
 	number_array[2] =SMG[ ((number/100)%10) ];
 	number_array[3] =SMG[ ((number/1000)%10) ] | RAW_WATER_ICON;
+	
+	//根据设备当前状态，更新lcd
 	if (device_status_lcd.no_water == YES)
 	{
 		number_array[0] |= NO_WATER_ICON;
@@ -415,6 +419,7 @@ void make_pure_ppm_number(unsigned int number, unsigned char *number_array){
 	number_array[2] =SMG[ ((number/100)%10) ];
 	number_array[3] =SMG[ ((number/1000)%10) ];
 	
+	//根据设备当前状态，更新lcd
 	if (device_status_lcd.leakage)
 	{
 		number_array[3] |= LEAKAGE_ICON;

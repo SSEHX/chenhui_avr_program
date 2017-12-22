@@ -19,11 +19,17 @@ app.d app.o: .././app.c .././app.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h \
- .././eeprom/eeprom.h .././port/port.h .././adc/adc.h .././uart/uart.h \
- .././uart/../device/device.h .././device/device.h .././lcd/lcd.h \
- .././lcd/../port/port.h .././lcd/../tools/tools.h \
- .././lcd/../tools/../lcd/lcd.h .././bc95/bc95.h .././bc95/../uart/uart.h \
- .././init/init.h
+ .././eeprom/eeprom.h .././port/port.h .././adc/adc.h \
+ .././adc/../uart/uart.h .././adc/../uart/../device/device.h \
+ .././adc/../uart/../device/../port/port.h \
+ .././adc/../uart/../device/../adc/adc.h \
+ .././adc/../uart/../device/../tools/tools.h \
+ .././adc/../uart/../device/../tools/../lcd/lcd.h \
+ z:\github\chenhui_avr_program\nb-iot_test\port\port.h \
+ z:\github\chenhui_avr_program\nb-iot_test\tools\tools.h \
+ .././adc/../uart/../bc95//bc95.h \
+ .././adc/../uart/../bc95//../uart/uart.h .././uart/uart.h \
+ .././device/device.h .././lcd/lcd.h .././bc95/bc95.h .././init/init.h
 
 .././app.h:
 
@@ -73,22 +79,32 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 
 .././adc/adc.h:
 
-.././uart/uart.h:
+.././adc/../uart/uart.h:
 
-.././uart/../device/device.h:
+.././adc/../uart/../device/device.h:
+
+.././adc/../uart/../device/../port/port.h:
+
+.././adc/../uart/../device/../adc/adc.h:
+
+.././adc/../uart/../device/../tools/tools.h:
+
+.././adc/../uart/../device/../tools/../lcd/lcd.h:
+
+z:\github\chenhui_avr_program\nb-iot_test\port\port.h:
+
+z:\github\chenhui_avr_program\nb-iot_test\tools\tools.h:
+
+.././adc/../uart/../bc95//bc95.h:
+
+.././adc/../uart/../bc95//../uart/uart.h:
+
+.././uart/uart.h:
 
 .././device/device.h:
 
 .././lcd/lcd.h:
 
-.././lcd/../port/port.h:
-
-.././lcd/../tools/tools.h:
-
-.././lcd/../tools/../lcd/lcd.h:
-
 .././bc95/bc95.h:
-
-.././bc95/../uart/uart.h:
 
 .././init/init.h:

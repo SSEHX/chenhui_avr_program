@@ -14,7 +14,7 @@
 #include "../uart/uart.h"
 
 
-#define RESEND_NUMBER	10;				//重发次数
+#define RESEND_NUMBER	30;				//重发次数
 
 #define SET     1       //命令类型为设置，只返回   OK     或者ERROR
 #define QUERY   2       //命令类型为询问，返回多个或一个参数
@@ -23,7 +23,7 @@
 #define LOOP    1       //循环发送
 #define UNLOOP  0       //不循环发送
 
-#define BC95_COMMAND_DELAY 4000
+#define BC95_COMMAND_DELAY 200
 
 
 /*--------------------------------------------------
@@ -108,6 +108,9 @@ struct bc95_device_status{
 	unsigned char eps_registered_status;	//eps网络注册状态
 	unsigned char plmn_status;				//plmn状态
 	unsigned char gsm_location_number[10];	//GSM位置区域识别号码
+	unsigned char have_reboot;				//bc95发生reboot
+	unsigned char have_receive;				//接收到数据
+	unsigned char socket_status;			//socket状态
 };
 
 struct bc95_device_status device_status_bc95;
@@ -116,6 +119,7 @@ void init_bc95();
 void bc95_reboot();
 void bc95_update_display_csq();
 unsigned char bc95_create_socket();
+unsigned char bc95_send_socket(struct bc95_send send_data);
 
 unsigned char type_set_process();
 unsigned char type_info_process(unsigned char init_command_number);
@@ -138,5 +142,4 @@ unsigned char callback_get_eps_status();
 -------------------------------------------------*/
 unsigned char callback_get_imsi();
 
-unsigned char callback_create_socket();
 #endif /* BC95_H_ */

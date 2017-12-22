@@ -5,6 +5,10 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "NB-IOT_test", "NB-IOT_test.cproj", "{DCE6C7E3-EE26-4D79-826B-08594B9AD897}"
 EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "main", "..\test_soft_1.1\main\main.cproj", "{FEE29784-05D0-419F-A798-3B5D80BD9349}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "GccApplication1", "..\zulin-soft\GccApplication1\GccApplication1.cproj", "{78A448F3-D073-4685-B4FF-62AC200BC4BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AVR = Debug|AVR
@@ -15,6 +19,14 @@ Global
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|AVR.Build.0 = Debug|AVR
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|AVR.ActiveCfg = Release|AVR
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|AVR.Build.0 = Release|AVR
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Debug|AVR.ActiveCfg = Debug|AVR
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Debug|AVR.Build.0 = Debug|AVR
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Release|AVR.ActiveCfg = Release|AVR
+		{FEE29784-05D0-419F-A798-3B5D80BD9349}.Release|AVR.Build.0 = Release|AVR
+		{78A448F3-D073-4685-B4FF-62AC200BC4BC}.Debug|AVR.ActiveCfg = Debug|AVR
+		{78A448F3-D073-4685-B4FF-62AC200BC4BC}.Debug|AVR.Build.0 = Debug|AVR
+		{78A448F3-D073-4685-B4FF-62AC200BC4BC}.Release|AVR.ActiveCfg = Release|AVR
+		{78A448F3-D073-4685-B4FF-62AC200BC4BC}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

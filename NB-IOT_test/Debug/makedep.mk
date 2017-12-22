@@ -18,6 +18,8 @@ lcd\lcd.c
 
 port\port.c
 
+timer\timer.c
+
 tools\tools.c
 
 uart\uart.c

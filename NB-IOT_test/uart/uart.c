@@ -199,5 +199,20 @@ SIGNAL(USART1_RX_vect){
 	uart1_rx_data.message[uart1_rx_data.message_length] = UDR1;		//保存接收到的数据
 	uart1_rx_data.message_length++;									//计数
 	
+	if (uart1_rx_data.message_length >= 10)
+	{
+		
+		//如果检测到接收数据，则标记接收到消息，
+		if (strstr(uart1_rx_data.message, "+NSONMI:") != NULL)
+		{
+			device_status_bc95.have_receive = 1;
+			//如果检测到bc95模块重启则重新初始化
+		}else if (strstr(uart1_rx_data.message, "REBOOT_CAU") != NULL)
+		{
+			device_status_bc95.have_reboot = 1;
+		}
+		
+	}
+	
 	LED_REVERSE;
 }

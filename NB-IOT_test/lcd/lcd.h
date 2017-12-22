@@ -34,6 +34,8 @@ struct home_device_status {
 	unsigned char no_water;
 	unsigned char signal;
 	unsigned char leakage;
+	unsigned int  raw_water_tds;
+	unsigned int  pure_water_tds;
 };
 
 struct home_device_status device_status_lcd;

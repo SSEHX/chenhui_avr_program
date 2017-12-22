@@ -14,6 +14,7 @@ const char bc95_response_ok[]	= "\r\nOK\r\n";
 const char bc95_response_error[] = "ERROR";
 
 unsigned char bc95_reboot_command[] = "AT+NRB\r\n";
+unsigned char bc95_close_socket_command[] = "AT+NSOCL=0\r\n";
 
 
 /*---------------------------------------------------
@@ -412,6 +413,35 @@ void init_bc95(){
                 break;
         }
     }
+	//创建socket连接
+	device_status_bc95.socket_status = bc95_create_socket();
+	if (device_status_bc95.socket_status == 'e')
+	{
+		//尝试关闭连接
+		bc95_send_string(bc95_close_socket_command);
+		_delay_ms(BC95_COMMAND_DELAY);
+/*--------------------------------------
+			调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 socket create error try to close socket ... \r\n");
+#endif
+		//重新创建socket连接，如果错误则标记socket创建失败
+		device_status_bc95.socket_status = bc95_create_socket();
+		if (device_status_bc95.socket_status != 'e')
+		{
+			uart0_send_string("bc95 socket try reconnect success ...\r\n");
+			device_status_bc95.socket_status = 1;
+		}else{
+/*--------------------------------------
+			调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+	uart0_send_string("bc95 rebooting ... \r\n");
+#endif
+			bc95_reboot();
+		}
+	}
 }
 
 /*------------------------------------------------------------------------------
@@ -455,8 +485,6 @@ unsigned char type_set_process(){
 * 返 回 值：无
 *-----------------------------------------------------------------------------*/
 unsigned char type_info_process(unsigned char init_command_number){
-	unsigned char test[] = "\r\n460111176388046\r\n\r\nOK\r\n";
-	//strcpy(query_data_flag.message, uart1_rx_array);
 	strcpy(query_data_flag.message, uart1_rx_data.message);
 	uart1_rx_array_set_empty();
 	query_data_flag.message_length = strlen(query_data_flag.message);
@@ -638,19 +666,64 @@ unsigned char bc95_create_socket(){
     strcat(command, socket_config.receive_control);
 	strcat(command, "\r\n");
 
+	uart1_rx_array_set_empty();
 	//发送给bc95
 	bc95_send_string(command);
 	
-	/*--------------------------------------
-					调试输出
-    --------------------------------------*/
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
 #ifdef	DEBUG
 	uart0_send_string("bc95 create socket command ---> ");
 	uart0_send_string(command);
 	uart0_send_string("\r\n");
 #endif
+	
+	strcpy(query_data_flag.message, uart1_rx_data.message);
+	query_data_flag.message_length = strlen(uart1_rx_data.message);
+	
+	if (strstr(query_data_flag.message, bc95_response_ok) != NULL)
+	{
+		//循环遍历信息
+		for (unsigned int i = 0 ; i < query_data_flag.message_length ; i ++){
+			if (query_data_flag.message[i] == '\r')
+			{
+				//如果已经找到数据开头，则再次检测到”\r“为结束
+				if (query_data_flag.info_offset_start != 0)
+				{
 
-	socket_config.socket_number = query_process(callback_create_socket);
+					socket_config.socket_number = query_data_flag.message[query_data_flag.info_offset_start];
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+					uart0_send_string("bc95 get socket number ---> ");
+					uart0_send_byte(socket_config.socket_number);
+					uart0_send_string("\r\n");
+#endif					
+					return 1;
+				}
+				//如果检测到”\r“则直接看下一位是否为”\n“如果是则直接跳过/n到数据位
+				if (query_data_flag.message[i+1] == '\n')
+				{
+					i++;
+					//设置信息开始位置偏移量
+					query_data_flag.info_offset_start = i+1;
+				}
+			}
+		}
+		
+	}//没有成功标识，表示失败
+	else{
+/*--------------------------------------
+				调试输出
+--------------------------------------*/
+#ifdef	DEBUG
+					uart0_send_string("bc95 get socket number ---> ERROR \r\n");
+#endif	
+		
+		return 'e';
+	}
 }
 
 /*------------------------------------------------------------------------------
@@ -692,6 +765,7 @@ unsigned char bc95_send_socket(struct bc95_send send_data){
 	
 }
 
+
 /*------------------------------------------------------------------------------
 * 函数名称：set_bc95_query_data_flag_empty
 * 功    能：清空 query_data_flage	结构体
@@ -702,6 +776,7 @@ unsigned char bc95_send_socket(struct bc95_send send_data){
 inline void set_bc95_query_data_flag_empty(){
 	memset(&query_data_flag , 0, sizeof(struct bc95_query_data_flag));
 }
+
 
 /*------------------------------------------------------------------------------
 * 函数名称：callback_get_imei
@@ -1038,6 +1113,13 @@ unsigned char callback_get_profile_status(){
 	}
 }
 
+/*------------------------------------------------------------------------------
+* 函数名称：callback_get_plmn
+* 功    能：解析bc95返回的数据，获取plmn状态和gsm位置区域识别号码
+* 入口参数：无
+* 出口参数：无
+* 返 回 值：unsigned char 获取是否成功，	1--->成功	0--->不成功
+*-----------------------------------------------------------------------------*/
 unsigned char callback_get_plmn(){
 		unsigned char name[] = "COPS";
 		unsigned char cache_count = 0;
@@ -1071,7 +1153,7 @@ unsigned char callback_get_plmn(){
 				device_status_bc95.plmn_status = query_data_flag.message[query_data_flag.colon_offset+1];
 				
 				//循环存储gsm位置区域识别号，碰到‘\r’即为结束，并返回
-				for (unsigned int i = query_data_flag.comma_offset[1]; i < query_data_flag.message_length ; i++)
+				for (unsigned int i = query_data_flag.comma_offset[1]+1; i < query_data_flag.message_length ; i++)
 				{
 					if (query_data_flag.message[i] != '\r')
 					{
@@ -1112,9 +1194,7 @@ unsigned char callback_get_plmn(){
 	return 0;
 }
 
-unsigned char callback_create_socket(){
-	return 0;
-}
+
 /*
 [2017-12-19 20:52:31:560_S:] AT+NSOST=0,119.23.26.195,9100,1,48
 [2017-12-19 20:52:31:604_R:]
